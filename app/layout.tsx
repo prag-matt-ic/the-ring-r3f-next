@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Long_Cang } from "next/font/google";
 
 const longCang = Long_Cang({
-  variable: "--long-cang",
+  variable: "--font-long-cang",
   subsets: ["latin"],
   weight: ["400"],
 });
