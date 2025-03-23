@@ -194,7 +194,7 @@ export const TheRingParticles: FC<Props> = ({ textPoints }) => {
       // Spawn new particle if the current one is dead
       If(life.lessThanEqual(0.0), () => {
         // Assign a random lifetime
-        life.assign(mix(0.03, 0.24, hash(idx.add(2))));
+        life.assign(mix(0.03, 0.2, hash(idx.add(2))));
 
         const isText = object.equal(1.0);
 

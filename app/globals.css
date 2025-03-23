@@ -9,6 +9,7 @@
   --color-transparent: transparent;
   --color-white: #fff;
   --color-black: #000;
+  --color-light: #4B7284;
   --font-sans: var(--font-long-cang);
   --font-mono: var(--font-long-cang);
 }

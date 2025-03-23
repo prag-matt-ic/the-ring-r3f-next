@@ -116,22 +116,22 @@ export const TheRingNameInput: FC<Props> = ({ name, setTextPoints }) => {
           <input
             type="text"
             value={inputName}
-            className="border-white tracking-widest bg-black text-left text-white p-2 text-5xl outline-none"
+            className="border-white tracking-widest bg-black text-left text-white p-2 text-5xl outline-none placeholder:text-light/50"
             onChange={(e) => setInputName(e.target.value)}
             placeholder="Enter a name"
           />
         </form>
 
         <button
-          className={`text-2xl tracking-wide uppercase text-left hover:text-cyan-400 p-2 ${
-            isUrlCopied ? "text-cyan-600" : ""
+          className={`text-2xl tracking-wide uppercase text-left hover:text-light p-2 ${
+            isUrlCopied ? "text-light" : ""
           }`}
           onClick={onCopyUrlClick}
         >
           {isUrlCopied ? "It's all yours!" : "Copy URL"}
         </button>
         <button
-          className="text-2xl tracking-wide uppercase text-left hover:text-cyan-400 p-2"
+          className="text-2xl tracking-wide uppercase text-left hover:text-light p-2"
           onClick={onResetClick}
         >
           Reset
@@ -145,13 +145,13 @@ export const TheRingNameInput: FC<Props> = ({ name, setTextPoints }) => {
         <input
           type="text"
           value={inputName}
-          className="border-white tracking-widest bg-black text-center text-white p-3 text-7xl outline-none"
+          className="border-white tracking-widest bg-black text-center text-white p-3 text-7xl outline-none placeholder:text-light/50"
           onChange={(e) => setInputName(e.target.value)}
           placeholder="Enter a name"
         />
         <button
           formAction="submit"
-          className="text-2xl tracking-wide cursor-pointer hover:opacity-60"
+          className="text-2xl tracking-wide cursor-pointer hover:text-light p-2"
           disabled={!inputName}
         >
           PRESS ENTER
