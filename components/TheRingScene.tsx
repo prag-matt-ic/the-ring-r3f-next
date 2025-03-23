@@ -48,15 +48,15 @@ import {
 const COLOUR_COUNT = 100;
 
 const PALETTE = [
-  ...colorsFromRange("bright", {
+  ...colorsFromRange("cool", {
     base: "silver",
-    num: COLOUR_COUNT * 0.7,
-    variance: 0.05,
+    num: COLOUR_COUNT * 0.8,
+    variance: 0.2,
   }),
-  ...colorsFromRange("neutral", {
-    base: "darkslateblue",
-    num: COLOUR_COUNT * 0.3,
-    variance: 0.02,
+  ...colorsFromRange("weak", {
+    base: "azure",
+    num: COLOUR_COUNT * 0.2,
+    variance: 0.05,
   }),
 ];
 
