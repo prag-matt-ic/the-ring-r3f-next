@@ -1,12 +1,6 @@
-import type { Metadata } from "next";
 import { use } from "react";
 
 import TheRing from "@/components/Client";
-
-export const metadata: Metadata = {
-  title: "The Ring with React Three Fiber & WebGPU",
-  description: "The Ring movie poster effect using WebGPU",
-};
 
 type PageProps = {
   searchParams: Promise<{ name: string | undefined }>;

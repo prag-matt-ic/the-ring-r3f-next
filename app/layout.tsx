@@ -10,8 +10,8 @@ const longCang = Long_Cang({
 });
 
 export const metadata: Metadata = {
-  title: "The Ring with React Three Fiber & WebGPU",
-  description: "The Ring movie poster effect using WebGPU",
+  title: "The Ring in 3D",
+  description: "A horrible showcase of ThreeJS Shading Language",
 };
 
 export default function RootLayout({
