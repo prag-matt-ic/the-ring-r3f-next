@@ -49,7 +49,7 @@ export const TheRingNameInput: FC<Props> = ({ name, setTextPoints }) => {
       let fontSize = 120;
       // Set the font using the custom font-family.
       ctx.font = `${fontSize}px "Long Cang", "Long Cang Fallback"`;
-      ctx.letterSpacing = "32px";
+      ctx.letterSpacing = `${Math.round(120 / name.length)}px`;
 
       // Measure the text width to adjust the font size so that it fills the canvas width.
       const measuredWidth = ctx.measureText(lowercaseName).width;
