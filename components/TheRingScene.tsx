@@ -402,7 +402,7 @@ export const backgroundNode = Fn(() => {
     )
   );
   const noiseColor = color("#47545A");
-  const finalColor = mix(baseColour, noiseColor, noiseLines.mul(0.1));
+  const finalColor = mix(baseColour, noiseColor, noiseLines.mul(0.15));
 
   // Circular vignette
   const screenAspect = screenSize.x.div(screenSize.y);
