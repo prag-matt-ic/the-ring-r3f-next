@@ -15,6 +15,7 @@ import {
   TheRingParticles,
   TheRingVideo,
 } from "@/components/TheRingScene";
+import Voice from "@/components/Voice";
 
 declare module "@react-three/fiber" {
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -60,6 +61,7 @@ const TheRing: FC<Props> = ({ name }) => {
         <TheRingParticles textPoints={textPoints} />
       </Canvas>
       <TheRingNameInput name={name} setTextPoints={setTextPoints} />
+      <Voice name={name} />
     </>
   );
 };

@@ -13,6 +13,7 @@
     "@react-three/drei": "^10.0.4",
     "@react-three/fiber": "^9.1.0",
     "@thi.ng/color": "^5.7.30",
+    "elevenlabs": "^1.54.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "gsap": "npm:@gsap/business@^3.12.7",
     "next": "15.2.3",

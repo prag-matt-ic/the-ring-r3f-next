@@ -11,14 +11,16 @@ import React, {
 } from "react";
 
 import { RING_RADIUS } from "./TheRingScene";
+import useAudioStore from "@/hooks/useAudioStore";
 
-type Props = {
+export type Props = {
   name?: string;
   setTextPoints: Dispatch<SetStateAction<Float32Array | null>>;
 };
 
 export const TheRingNameInput: FC<Props> = ({ name, setTextPoints }) => {
   const { push } = useRouter();
+  const setIsPlayingAudio = useAudioStore((state) => state.setIsPlaying);
   const [inputName, setInputName] = useState<string>(name ?? "");
 
   useLayoutEffect(() => {
@@ -89,6 +91,7 @@ export const TheRingNameInput: FC<Props> = ({ name, setTextPoints }) => {
     e.preventDefault();
     if (!inputName) return;
     setTextPoints(null);
+    setIsPlayingAudio(true);
     push(`?name=${inputName}`);
   };
 
