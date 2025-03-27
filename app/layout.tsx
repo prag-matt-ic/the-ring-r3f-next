@@ -10,8 +10,8 @@ const longCang = Long_Cang({
 });
 
 export const metadata: Metadata = {
-  title: "The Ring in 3D",
-  description: "A horrible showcase of ThreeJS Shading Language",
+  title: "The Ring Poster in 3D",
+  description: "A scary showcase of Three.js Shading Language in Next.js",
 };
 
 export default function RootLayout({
