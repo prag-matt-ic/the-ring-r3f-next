@@ -417,16 +417,16 @@ export const backgroundNode = Fn(() => {
   const specklyNoise = mx_noise_float(
     vec3(screenUV.x.mul(400), screenUV.y.mul(360), 1.0)
   );
-  const noiseStep = mod(time, 0.3).mul(0.4);
+  const noiseStep = mod(time, 0.3).mul(0.5);
   const noiseLines = mx_noise_float(
     vec3(
       screenUV.x.mul(4).add(specklyNoise).add(time),
-      screenUV.y.mul(28).add(specklyNoise).sub(noiseStep),
+      screenUV.y.mul(40).add(specklyNoise).sub(noiseStep),
       time.mul(0.2)
     )
-  );
-  const noiseColor = color("#47545A");
-  const finalColor = mix(baseColour, noiseColor, noiseLines.mul(0.15));
+  ).pow(6.0);
+  const noiseColor = color("#677278");
+  const finalColor = mix(baseColour, noiseColor, noiseLines);
 
   // Circular vignette
   const screenAspect = screenSize.x.div(screenSize.y);
