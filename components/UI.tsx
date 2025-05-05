@@ -1,14 +1,23 @@
 "use client";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 import { useRouter } from "next/navigation";
 import React, {
   type Dispatch,
   type FC,
   type FormEvent,
+  forwardRef,
   type SetStateAction,
   useEffect,
   useLayoutEffect,
+  useRef,
   useState,
 } from "react";
+import {
+  SwitchTransition,
+  Transition,
+  TransitionStatus,
+} from "react-transition-group";
 
 import { RING_RADIUS } from "./TheRingScene";
 
@@ -17,9 +26,13 @@ type Props = {
   setTextPoints: Dispatch<SetStateAction<Float32Array | null>>;
 };
 
+// TODO: add sound effects to make this creepy
+// TODO: record Youtube video
+
 export const UI: FC<Props> = ({ name, setTextPoints }) => {
   const { push } = useRouter();
   const [inputName, setInputName] = useState<string>(name ?? "");
+  const container = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     setInputName(name ?? "");
@@ -87,7 +100,7 @@ export const UI: FC<Props> = ({ name, setTextPoints }) => {
     generateTextPoints();
   }, [name, setTextPoints]);
 
-  const onSubmit = (e: FormEvent) => {
+  const onNameSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!inputName) return;
     setTextPoints(null);
@@ -99,26 +112,109 @@ export const UI: FC<Props> = ({ name, setTextPoints }) => {
     push("?");
   };
 
-  const [isUrlCopied, setIsUrlCopied] = useState(false);
+  const hasName = !!name;
 
-  const onCopyUrlClick = () => {
-    try {
-      navigator.clipboard.writeText(window.location.href);
-      setIsUrlCopied(true);
-      setTimeout(() => setIsUrlCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy text to clipboard:", err);
-    }
-  };
+  return (
+    <SwitchTransition>
+      <Transition
+        key={`${hasName}`}
+        appear={true}
+        nodeRef={container}
+        timeout={{ enter: 0, exit: 500 }}
+      >
+        {(transitionStatus) => {
+          if (hasName)
+            return (
+              <MainUI
+                ref={container}
+                transitionStatus={transitionStatus}
+                onNameSubmit={onNameSubmit}
+                inputName={inputName}
+                setInputName={setInputName}
+                onResetClick={onResetClick}
+              />
+            );
+          return (
+            <Landing
+              ref={container}
+              transitionStatus={transitionStatus}
+              inputName={inputName}
+              setInputName={setInputName}
+              onNameSubmit={onNameSubmit}
+            />
+          );
+        }}
+      </Transition>
+    </SwitchTransition>
+  );
+};
 
-  if (!!name)
+type CommonUIProps = {
+  transitionStatus: TransitionStatus;
+  inputName: string;
+  setInputName: Dispatch<SetStateAction<string>>;
+  onNameSubmit: (e: FormEvent) => void;
+};
+
+type MainUIProps = CommonUIProps & {
+  onResetClick: () => void;
+};
+
+const MainUI = forwardRef<HTMLDivElement, MainUIProps>(
+  (
+    { transitionStatus, inputName, setInputName, onNameSubmit, onResetClick },
+    ref
+  ) => {
+    const [isUrlCopied, setIsUrlCopied] = useState(false);
+
+    const onCopyUrlClick = () => {
+      try {
+        navigator.clipboard.writeText(window.location.href);
+        setIsUrlCopied(true);
+        setTimeout(() => setIsUrlCopied(false), 2000);
+      } catch (err) {
+        console.error("Failed to copy text to clipboard:", err);
+      }
+    };
+
+    useGSAP(
+      () => {
+        const onEnter = () => {
+          gsap.fromTo(
+            "#ui",
+            { opacity: 0 },
+            {
+              opacity: 1,
+            }
+          );
+        };
+
+        const onExiting = () => {
+          gsap.to("#ui", {
+            opacity: 0,
+            duration: 0.4,
+          });
+        };
+
+        if (transitionStatus === "exiting") onExiting();
+        if (transitionStatus === "entering") onEnter();
+      },
+      {
+        dependencies: [transitionStatus],
+      }
+    );
+
     return (
-      <section className="fixed top-8 left-8 z-50 flex flex-col gap-2">
-        <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <section
+        ref={ref}
+        id="ui"
+        className="fixed top-8 left-8 z-50 flex flex-col gap-2"
+      >
+        <form onSubmit={onNameSubmit} className="flex flex-col gap-4">
           <input
             type="text"
             value={inputName}
-            className="border-white tracking-widest bg-black text-left text-white p-2 text-5xl outline-none placeholder:text-light/50"
+            className="border-white/10 rounded-lg border active:border-light focus:border-light tracking-widest bg-black/20 text-white p-2 text-4xl outline-none placeholder:text-light/50"
             onChange={(e) => setInputName(e.target.value)}
             placeholder="Enter a name"
           />
@@ -150,25 +246,65 @@ export const UI: FC<Props> = ({ name, setTextPoints }) => {
         </a>
       </section>
     );
+  }
+);
+MainUI.displayName = "MainUI"; // Set display name for debugging
 
-  return (
-    <section className="relative size-full flex items-center justify-center z-50">
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <input
-          type="text"
-          value={inputName}
-          className="border-white tracking-widest bg-black text-center text-white p-3 text-7xl outline-none placeholder:text-light/50"
-          onChange={(e) => setInputName(e.target.value)}
-          placeholder="Enter a name"
-        />
-        <button
-          formAction="submit"
-          className="text-2xl tracking-wide cursor-pointer hover:text-light p-2"
-          disabled={!inputName}
-        >
-          press enter
-        </button>
-      </form>
-    </section>
-  );
-};
+// Use forwardRef for Landing
+const Landing = forwardRef<HTMLDivElement, CommonUIProps>(
+  ({ inputName, setInputName, onNameSubmit, transitionStatus }, ref) => {
+    useGSAP(
+      () => {
+        const onEnter = () => {
+          gsap.fromTo(
+            "#landing",
+            { opacity: 0 },
+            {
+              opacity: 1,
+            }
+          );
+        };
+
+        const onExiting = () => {
+          gsap.to("#landing", {
+            opacity: 0,
+            duration: 0.4,
+          });
+        };
+
+        if (transitionStatus === "exiting") onExiting();
+        if (transitionStatus === "entering") onEnter();
+      },
+      {
+        dependencies: [transitionStatus],
+      }
+    );
+
+    return (
+      <section
+        ref={ref}
+        id="landing"
+        className="relative size-full flex items-center justify-center z-50"
+      >
+        <form onSubmit={onNameSubmit} className="flex flex-col gap-4">
+          <input
+            type="text"
+            value={inputName}
+            className="border-white tracking-widest bg-black text-center text-white p-3 text-7xl outline-none placeholder:text-light/50"
+            onChange={(e) => setInputName(e.target.value)}
+            placeholder="Enter a name"
+          />
+          <button
+            formAction="submit"
+            className="text-2xl tracking-wide cursor-pointer hover:text-light p-2"
+            disabled={!inputName}
+          >
+            press enter
+          </button>
+        </form>
+      </section>
+    );
+  }
+);
+
+Landing.displayName = "Landing"; // Set display name for debugging

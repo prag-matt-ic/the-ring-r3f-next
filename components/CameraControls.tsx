@@ -26,10 +26,8 @@ const CameraControls: FC = () => {
 
     const onPointerMove = (e: PointerEvent) => {
       // Calculate normalized position from center of screen (-1 to 1 range)
-      // For Y, -1 is top, 1 is bottom
       const normalizedY =
         -(e.clientY - debouncedSize.height / 2) / (debouncedSize.height / 2);
-      // For X, -1 is left, 1 is right
       const normalizedX =
         -(e.clientX - debouncedSize.width / 2) / (debouncedSize.width / 2);
 

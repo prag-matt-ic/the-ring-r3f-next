@@ -56,11 +56,6 @@ const TheRing: FC<Props> = ({ name }) => {
           return renderer;
         }}
       >
-        {/* <OrbitControls
-          enableZoom={false}
-          minAzimuthAngle={-Math.PI / 4}
-          maxAzimuthAngle={Math.PI / 4}
-        /> */}
         <CameraControls />
         <TheRingVideo shouldPlay={!!textPoints} />
         <TheRingParticles textPoints={textPoints} />
