@@ -6,11 +6,11 @@ import { useFrame, useThree } from "@react-three/fiber";
 import React, { type FC, useEffect, useRef } from "react";
 import { MathUtils } from "three";
 
-const MIN_POLAR_ANGLE = MathUtils.degToRad(60);
-const MAX_POLAR_ANGLE = MathUtils.degToRad(120);
+const MIN_POLAR_ANGLE = MathUtils.degToRad(55);
+const MAX_POLAR_ANGLE = MathUtils.degToRad(125);
 
-const MIN_AZIMUTH_ANGLE = MathUtils.degToRad(-30);
-const MAX_AZIMUTH_ANGLE = MathUtils.degToRad(30);
+const MIN_AZIMUTH_ANGLE = MathUtils.degToRad(-35);
+const MAX_AZIMUTH_ANGLE = MathUtils.degToRad(35);
 
 const CameraControls: FC = () => {
   const size = useThree((s) => s.size);
@@ -25,18 +25,26 @@ const CameraControls: FC = () => {
     if (debouncedSize.width < 480) return;
 
     const onPointerMove = (e: PointerEvent) => {
-      const normalizedY = e.clientY / debouncedSize.width;
-      const newPolarAngle = MathUtils.lerp(
-        MAX_POLAR_ANGLE,
-        MIN_POLAR_ANGLE,
-        normalizedY
-      );
-      const normalizedX = e.clientX / debouncedSize.width;
-      const newAzimuthAngle = MathUtils.lerp(
-        MAX_AZIMUTH_ANGLE,
-        MIN_AZIMUTH_ANGLE,
-        normalizedX
-      );
+      // Calculate normalized position from center of screen (-1 to 1 range)
+      // For Y, -1 is top, 1 is bottom
+      const normalizedY =
+        -(e.clientY - debouncedSize.height / 2) / (debouncedSize.height / 2);
+      // For X, -1 is left, 1 is right
+      const normalizedX =
+        -(e.clientX - debouncedSize.width / 2) / (debouncedSize.width / 2);
+
+      // When normalizedY is 0 (center of screen), we want polar angle to be exactly 90 degrees (π/2)
+      // Map the normalized range to our polar angle range
+      const centerPolarAngle = MathUtils.degToRad(90); // Center value (when pointer is at center height)
+      const polarRangeHalf = (MAX_POLAR_ANGLE - MIN_POLAR_ANGLE) / 2;
+      const newPolarAngle = centerPolarAngle + normalizedY * polarRangeHalf;
+
+      // Similar mapping for azimuth angle
+      const centerAzimuthAngle = 0; // Center value (when pointer is at center width)
+      const azimuthRangeHalf = (MAX_AZIMUTH_ANGLE - MIN_AZIMUTH_ANGLE) / 2;
+      const newAzimuthAngle =
+        centerAzimuthAngle + normalizedX * azimuthRangeHalf;
+
       targetPolarAngle.current.value = newPolarAngle;
       targetAzimuthAngle.current.value = newAzimuthAngle;
     };

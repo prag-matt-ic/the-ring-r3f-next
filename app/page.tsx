@@ -10,7 +10,7 @@ export default function TheRingPage(props: PageProps) {
   const { name } = use(props.searchParams);
 
   return (
-    <main className="w-full h-lvh">
+    <main className="w-full h-lvh overflow-ellipsis">
       <TheRing name={name} />
     </main>
   );

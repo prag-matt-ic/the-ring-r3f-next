@@ -31,6 +31,8 @@ export const UI: FC<Props> = ({ name, setTextPoints }) => {
       const lowercaseName = name.toLowerCase();
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
+
+      // Show the canvas:
       // canvas.style.position = "fixed";
       // canvas.style.top = "0";
       // canvas.style.left = "0";
@@ -42,7 +44,7 @@ export const UI: FC<Props> = ({ name, setTextPoints }) => {
       canvas.height = size;
 
       // Fill the canvas with a black background.
-      ctx.fillStyle = "black";
+      ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, size, size);
 
       // Start with an initially large font size.

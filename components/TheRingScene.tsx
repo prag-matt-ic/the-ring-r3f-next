@@ -4,7 +4,7 @@ import { useVideoTexture } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { colorsFromRange, css } from "@thi.ng/color";
 import gsap from "gsap";
-import React, { type FC, useMemo, useRef } from "react";
+import React, { type FC, Suspense, useMemo, useRef } from "react";
 import {
   array,
   color,
@@ -44,26 +44,23 @@ import {
 } from "three/webgpu";
 
 // Generate color palette
-// https://www.npmjs.com/package/@thi.ng/color
-
-const COLOUR_COUNT = 60;
-
 const PALETTE = [
   ...colorsFromRange("cool", {
     base: "silver",
-    num: COLOUR_COUNT * 0.8,
+    num: 40,
     variance: 0.2,
   }),
   ...colorsFromRange("weak", {
     base: "azure",
-    num: COLOUR_COUNT * 0.2,
+    num: 20,
     variance: 0.05,
   }),
 ];
 
+const COLOUR_COUNT = PALETTE.length;
 const colors = array(PALETTE.map((c) => color(css(c))));
 
-const PARTICLE_COUNT = Math.pow(300, 2);
+const PARTICLE_COUNT = Math.pow(320, 2);
 const NUMBER_OF_RING_CLUSTERS = 3;
 export const RING_RADIUS = 2.0;
 
@@ -114,7 +111,7 @@ export const TheRingParticles: FC<Props> = ({ textPoints }) => {
       initialVel.assign(vec4(0.0, 0.0, 0.0, object));
     })().compute(PARTICLE_COUNT);
 
-    const computeColor = Fn(() => {
+    const computeColours = Fn(() => {
       const seed = seedBuffer.element(instanceIndex);
       const c = colorBuffer.element(instanceIndex);
       const colorIndex = hash(instanceIndex.sub(3)).mul(COLOUR_COUNT).floor();
@@ -124,7 +121,7 @@ export const TheRingParticles: FC<Props> = ({ textPoints }) => {
       c.assign(finalColor);
     })().compute(PARTICLE_COUNT);
 
-    renderer.computeAsync([computeColor, computeInitialPositions]);
+    renderer.computeAsync([computeColours, computeInitialPositions]);
 
     // @ts-expect-error missing type in TSL
     const positionNode = positionBuffer.toAttribute().xyz;
@@ -151,8 +148,6 @@ export const TheRingParticles: FC<Props> = ({ textPoints }) => {
       return baseScale.mul(attenuation);
     })();
 
-    const key = colorNode.uuid;
-
     const updateParticles = Fn(() => {
       const seed = seedBuffer.element(instanceIndex);
       const pos = positionBuffer.element(instanceIndex).xyz;
@@ -168,7 +163,7 @@ export const TheRingParticles: FC<Props> = ({ textPoints }) => {
           1.0,
           0.4,
           0.5
-        ).mul(life.add(0.25));
+        ).mul(life.add(0.5));
 
         const isOnText = object.equal(1.0);
 
@@ -286,7 +281,7 @@ export const TheRingParticles: FC<Props> = ({ textPoints }) => {
     })().compute(PARTICLE_COUNT);
 
     return {
-      key,
+      key: colorNode.uuid,
       positionNode,
       colorNode,
       scaleNode,
@@ -315,24 +310,22 @@ export const TheRingParticles: FC<Props> = ({ textPoints }) => {
   if (!textPoints) return null;
 
   return (
-    <>
-      <instancedMesh
-        args={[undefined, undefined, PARTICLE_COUNT]}
-        frustumCulled={false}
-      >
-        <planeGeometry args={[0.035, 0.035]} />
-        <spriteNodeMaterial
-          key={key}
-          positionNode={positionNode}
-          colorNode={colorNode}
-          scaleNode={scaleNode}
-          opacityNode={opacityNode}
-          blending={AdditiveBlending}
-          depthWrite={false}
-          transparent={true}
-        />
-      </instancedMesh>
-    </>
+    <instancedMesh
+      args={[undefined, undefined, PARTICLE_COUNT]}
+      frustumCulled={false}
+    >
+      <planeGeometry args={[0.036, 0.036]} />
+      <spriteNodeMaterial
+        key={key}
+        positionNode={positionNode}
+        colorNode={colorNode}
+        scaleNode={scaleNode}
+        opacityNode={opacityNode}
+        blending={AdditiveBlending}
+        depthWrite={false}
+        transparent={true}
+      />
+    </instancedMesh>
   );
 };
 
@@ -341,7 +334,11 @@ type VideoProps = {
 };
 
 export const TheRingVideo: FC<VideoProps> = ({ shouldPlay = false }) => {
-  const videoTexture = useVideoTexture("/videos/ring-girl.mp4");
+  const videoTexture = useVideoTexture("/videos/ring-girl.mp4", {
+    start: shouldPlay,
+    muted: true,
+    loop: false,
+  });
   videoTexture.colorSpace = SRGBColorSpace;
   const planeWidth = 16;
   const planeHeight = 9;
@@ -349,7 +346,7 @@ export const TheRingVideo: FC<VideoProps> = ({ shouldPlay = false }) => {
 
   const { colorNode, opacityNode, uOpacity, uVideoTexture } = useMemo(() => {
     const uVideoTexture = uniform(VideoTexture, typeof VideoTexture);
-    const uOpacity = uniform(float(0.0)).label("isPlaying");
+    const uOpacity = uniform(float(0.0)).label("uOpacity");
 
     const opacityNode = uOpacity;
 
@@ -378,7 +375,10 @@ export const TheRingVideo: FC<VideoProps> = ({ shouldPlay = false }) => {
   useGSAP(
     () => {
       if (!uOpacity) return;
-      gsap.to(uOpacity, { value: shouldPlay ? 1.0 : 0.0, duration: 1.0 });
+      gsap.to(uOpacity, {
+        value: shouldPlay ? 1.0 : 0.0,
+        duration: 1.0,
+      });
     },
     { dependencies: [shouldPlay, uOpacity] }
   );
@@ -390,18 +390,18 @@ export const TheRingVideo: FC<VideoProps> = ({ shouldPlay = false }) => {
     uVideoTexture.value = videoTexture;
   });
 
-  if (!videoTexture) return null;
-
   return (
-    <mesh position={[0, 0, -3]} scale={0.8}>
-      <planeGeometry args={[planeWidth, planeHeight]} />
-      <meshBasicNodeMaterial
-        colorNode={colorNode}
-        opacityNode={opacityNode}
-        depthTest={false}
-        transparent={true}
-      />
-    </mesh>
+    <Suspense fallback={null}>
+      <mesh position={[0, 0, -3]} scale={0.8}>
+        <planeGeometry args={[planeWidth, planeHeight]} />
+        <meshBasicNodeMaterial
+          colorNode={colorNode}
+          opacityNode={opacityNode}
+          depthTest={false}
+          transparent={true}
+        />
+      </mesh>
+    </Suspense>
   );
 };
 
@@ -420,8 +420,8 @@ export const backgroundNode = Fn(() => {
   const noiseStep = mod(time, 0.3).mul(0.5);
   const noiseLines = mx_noise_float(
     vec3(
-      screenUV.x.mul(4).add(specklyNoise).add(time),
-      screenUV.y.mul(40).add(specklyNoise).sub(noiseStep),
+      screenUV.x.mul(5.0).add(specklyNoise).add(time),
+      screenUV.y.mul(40.0).add(specklyNoise).sub(noiseStep),
       time.mul(0.2)
     )
   ).pow(6.0);
@@ -437,6 +437,5 @@ export const backgroundNode = Fn(() => {
   );
   const smoothCircle = smoothstep(0.3, 0.7, distanceToCenter);
   const c = mix(finalColor, color("#000"), smoothCircle);
-
   return c;
 })();
